@@ -1,0 +1,40 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<h1>Simple Envelope Test</h1>
+
+<div style="text-align: center; padding: 50px;">
+    <h2>Current State: @currentState</h2>
+    <p>Click Count: @clickCount</p>
+
+    @if (currentState == "closed")
+    {
+        <div style="width: 200px; height: 150px; background: lightblue; margin: 20px auto; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 2px solid navy;"
+             @onclick="OpenEnvelope">
+            <h3>📩 Click to Open</h3>
+        </div>
+    }
+    else
+    {
+        <div style="width: 200px; height: 150px; background: lightgreen; margin: 20px auto; display: flex; align-items: center; justify-content: center; border: 2px solid green;">
+            <h3>✉️ Opened!</h3>
+        </div>
+        <button @onclick="ResetEnvelope" style="padding: 10px 20px; margin: 10px;">Reset</button>
+    }
+</div>
+
+@code {
+    private string currentState = "closed";
+    private int clickCount = 0;
+
+    private void OpenEnvelope()
+    {
+        clickCount++;
+        currentState = "opened";
+    }
+
+    private void ResetEnvelope()
+    {
+        currentState = "closed";
+    }
+}
