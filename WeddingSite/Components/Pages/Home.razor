@@ -1,40 +1,265 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
-<h1>Simple Envelope Test</h1>
+<PageTitle>Wedding</PageTitle>
 
-<div style="text-align: center; padding: 50px;">
-    <h2>Current State: @currentState</h2>
-    <p>Click Count: @clickCount</p>
+<style>
+    body {
+        background-color: #F5F5DC; /* Beige background */
+        font-family: 'Georgia', serif;
+    }
 
-    @if (currentState == "closed")
-    {
-        <div style="width: 200px; height: 150px; background: lightblue; margin: 20px auto; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 2px solid navy;"
-             @onclick="OpenEnvelope">
-            <h3>📩 Click to Open</h3>
+    .wedding-container {
+        min-height: 100vh;
+        background-color: #F5F5DC;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .wedding-title {
+        color: #556B2F; /* Olive Green */
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 2rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        font-family: 'Georgia', serif;
+    }
+
+    .envelope-container {
+        perspective: 1000px;
+        margin: 2rem 0;
+    }
+
+    .envelope {
+        width: 400px;
+        height: 280px;
+        position: relative;
+        cursor: pointer;
+        transform-style: preserve-3d;
+        transition: transform 0.8s ease;
+    }
+
+        .envelope.opening {
+            transform: rotateY(10deg) rotateX(5deg);
+        }
+
+    /* Closed envelope using your uploaded image */
+    .envelope-body {
+        width: 100%;
+        height: 100%;
+        background-image: url('images/envelope-body.jpg'); /* Replace with your image path */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: absolute;
+        z-index: 1;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        border-radius: 4px;
+    }
+
+    /* Open envelope using your uploaded image */
+    .envelope-open {
+        width: 100%;
+        height: 100%;
+        background-image: url('images/envelope-flap.jpg'); /* Replace with your image path */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: absolute;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.5s ease 0.3s;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        border-radius: 4px;
+    }
+
+    .envelope.opening .envelope-open {
+        opacity: 1;
+    }
+
+    .envelope.opening .envelope-body {
+        opacity: 0;
+    }
+
+    /* Wax seal */
+    .wax-seal {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background: radial-gradient(circle at 35% 25%, #E6B800 0%, #DAA520 40%, #B8860B 80%, #8B6914 100%);
+        border-radius: 50%;
+        z-index: 5;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 6px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(139,105,20,0.3);
+    }
+
+    /* Wax seal text */
+    .wax-seal-text {
+        font-family: 'Brush Script MT', cursive, serif;
+        font-size: 20px;
+        font-weight: bold;
+        color: #654321;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5), -1px -1px 1px rgba(255,255,255,0.2);
+        transform: rotate(-3deg);
+    }
+
+    .envelope:hover .wax-seal {
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 6px rgba(0,0,0,0.4);
+    }
+
+    .envelope.opening .wax-seal {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+        transition: all 0.4s ease;
+    }
+
+    .invitation-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #F5F5DC;
+        width: 320px;
+        height: 200px;
+        border: 2px solid #DAA520;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.5s ease 0.8s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 3;
+    }
+
+    .envelope.opening .invitation-content {
+        opacity: 1;
+    }
+
+    .invitation-text {
+        color: #556B2F;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .invitation-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #DAA520;
+    }
+
+    .invitation-message {
+        font-size: 1.1rem;
+        line-height: 1.4;
+    }
+
+    .click-instruction {
+        color: #556B2F;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    .reset-button {
+        background: linear-gradient(45deg, #556B2F, #6B8E23);
+        color: #DAA520;
+        border: 2px solid #DAA520;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 2rem;
+        transition: all 0.3s ease;
+        font-family: 'Georgia', serif;
+    }
+
+        .reset-button:hover {
+            background: linear-gradient(45deg, #6B8E23, #556B2F);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+    .stats {
+        color: #556B2F;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        text-align: center;
+        opacity: 0.7;
+    }
+</style>
+
+<div class="wedding-container">
+    <h1 class="wedding-title">Wedding</h1>
+
+    <div class="envelope-container">
+        <div class="envelope @(isOpened ? "opening" : "")" @onclick="OpenEnvelope">
+            <!-- Closed envelope state -->
+            <div class="envelope-body"></div>
+
+            <!-- Open envelope state -->
+            <div class="envelope-open"></div>
+
+            <!-- Wax seal -->
+            <div class="wax-seal">
+                <div class="wax-seal-text">E & J</div>
+            </div>
+
+            @if (isOpened)
+            {
+                <div class="invitation-content">
+                    <div class="invitation-text">
+                        <div class="invitation-title">You Are Invited!</div>
+                        <div class="invitation-message">
+                            Join us for a celebration<br />
+                            of love and unity
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
+    </div>
+
+    @if (!isOpened)
+    {
+        <p class="click-instruction">Click the wax seal to open your invitation</p>
     }
     else
     {
-        <div style="width: 200px; height: 150px; background: lightgreen; margin: 20px auto; display: flex; align-items: center; justify-content: center; border: 2px solid green;">
-            <h3>✉️ Opened!</h3>
-        </div>
-        <button @onclick="ResetEnvelope" style="padding: 10px 20px; margin: 10px;">Reset</button>
+        <button class="reset-button" @onclick="ResetEnvelope">
+            Close Invitation
+        </button>
     }
 </div>
 
 @code {
-    private string currentState = "closed";
-    private int clickCount = 0;
+    private bool isOpened = false;
 
     private void OpenEnvelope()
     {
-        clickCount++;
-        currentState = "opened";
+        if (!isOpened)
+        {
+            isOpened = true;
+        }
     }
 
     private void ResetEnvelope()
     {
-        currentState = "closed";
+        isOpened = false;
     }
 }
