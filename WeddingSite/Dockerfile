@@ -1,28 +1,18 @@
-# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Copy ALL files from current directory
+# Copy everything
 COPY . .
 
-# Restore dependencies
-RUN dotnet restore
+# Restore, build, publish in one step
+RUN dotnet publish -c Release -o out
 
-# Build the project
-RUN dotnet build -c Release -o /app/build
-
-# Publish stage
-FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
-
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
+COPY --from=build /app/out .
+
 EXPOSE 80
 EXPOSE 443
 
-# Copy published app
-COPY --from=publish /app/publish .
-
-# Set entry point
 ENTRYPOINT ["dotnet", "Wedding.dll"]
